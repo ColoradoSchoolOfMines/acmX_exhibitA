@@ -7,6 +7,7 @@ SimpleOpenNI context;
  
 // PImage to hold incoming imagery
 PImage cam;
+int iters = 0;
  
 void setup() {
   // same as Kinect dimensions
@@ -24,12 +25,18 @@ void setup() {
     context.setMirror(true);
   }
 }
- 
+
 void draw() {
   // update the SimpleOpenNI object
   context.update();
   // put the image into a PImage
-  cam = context.sceneImage().get();
+  //cam = context.sceneImage().get();
+  //System.gc();
   // display the image
-  image(cam, 0, 0);
+  image(context.sceneImage(), 0, 0);
+  if (iters > 50) {
+   exit(); 
+  }
+  //iters++;
+  println("Iteration: " + iters);
 }
