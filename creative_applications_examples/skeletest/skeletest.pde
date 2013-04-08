@@ -8,6 +8,9 @@ SimpleOpenNI context;
 // PImage to hold incoming imagery
 PImage cam;
 int iters = 0;
+int user = 0;
+PVector pos = new PVector();
+PVector pos2D = new PVector();
 
 void setup() {
   // same as Kinect dimensions
@@ -15,7 +18,7 @@ void setup() {
   // initialize SimpleOpenNI object
   context = new SimpleOpenNI(this);
   context.addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
-  if (context.openFileRecording("hometest_single.oni")) {
+  if (false && context.openFileRecording("hometest_single.oni")) {
     println("Open File Recording was successful"); 
   } else {
     println("File opening was not successful"); 
@@ -30,9 +33,12 @@ void setup() {
   else {
     // mirror the image to be more intuitive
     context.setMirror(true);
-    context.enableDepth();
-    context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);background(200,0,0);
-    stroke(0,0,255);
+    if(!context.enableDepth()){
+      println("failed to enable depth");
+    }
+    context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
+    background(200,0,0);
+    stroke(0,255,255);
     strokeWeight(3);
     smooth();
   }
@@ -43,16 +49,20 @@ void draw() {
   context.update();
   // put the image into a PImage
   //cam = context.sceneImage().get();
-  for (int i=1; i<=10; i++)
-  {
-    // check if the skeleton is being tracked
-    if(context.isTrackingSkeleton(i))
-    {
-       drawSkeleton(i);
-    }
-  }
   // display the image
   image(context.sceneImage(), 0, 0);
+  if(user > 0){
+    drawHead(user);
+  }
+}
+
+void drawHead(int userId){
+  context.getJointPositionSkeleton(user, context.SKEL_HEAD, pos);
+  context.convertRealWorldToProjective(pos, pos2D);
+  pos = pos2D;
+  println(pos.x + " " + pos.y + " " + pos.z);
+  //println(pos2D.x + " " + pos2D.y);
+  ellipse(pos2D.x, pos2D.y, 30-pos.z*0.1, 30-pos.z*0.1);
 }
 
 // draw the skeleton with the selected joints
@@ -80,3 +90,59 @@ void drawSkeleton(int userId)
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
 }
 
+void onNewUser(int userId){
+  println("detected" + userId);
+  user = userId;
+  context.requestCalibrationSkeleton(userId,true);
+}
+void onLostUser(int userId){
+  println("lost: " + userId);
+  user = 0;
+}
+void onExitUser(int userId)
+{
+  println("onExitUser - userId: " + userId);
+}
+ 
+void onReEnterUser(int userId)
+{
+  println("onReEnterUser - userId: " + userId);
+}
+ 
+ 
+void onStartCalibration(int userId)
+{
+  println("onStartCalibration - userId: " + userId);
+}
+ 
+void onEndCalibration(int userId, boolean successfull)
+{
+  println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
+ 
+  if (successfull) 
+  { 
+    println("  User calibrated !!!");
+    context.startTrackingSkeleton(userId); 
+  } 
+  else 
+  { 
+    println("  Failed to calibrate user !!!");
+    println("  Start pose detection");
+    context.requestCalibrationSkeleton(userId,true);
+  }
+}
+ 
+void onStartPose(String pose,int userId)
+{
+  println("onStartdPose - userId: " + userId + ", pose: " + pose);
+  println(" stop pose detection");
+ 
+  context.stopPoseDetection(userId); 
+  context.requestCalibrationSkeleton(userId, true);
+ 
+}
+ 
+void onEndPose(String pose,int userId)
+{
+  println("onEndPose - userId: " + userId + ", pose: " + pose);
+}
