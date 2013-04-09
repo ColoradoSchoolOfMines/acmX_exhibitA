@@ -13,15 +13,26 @@ PVector pos = new PVector();
 PVector pos2D = new PVector();
 
 void setup() {
-  // same as Kinect dimensions
-  size(640, 480);
   // initialize SimpleOpenNI object
   context = new SimpleOpenNI(this);
-  context.addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
+  //context.addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
   if (false && context.openFileRecording("hometest_single.oni")) {
     println("Open File Recording was successful"); 
   } else {
     println("File opening was not successful"); 
+  }
+  {
+    // mirror the image to be more intuitive
+    context.setMirror(true);
+    if(!context.enableDepth()){
+      println("failed to enable depth");
+      
+    }
+    context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
+    background(200,0,0);
+    stroke(0,255,255);
+    strokeWeight(3);
+    smooth();
   }
   if (!context.enableScene()) {
     // if context.enableScene() returns false
@@ -30,18 +41,8 @@ void setup() {
     println("Kinect not connected!");
     exit();
   } 
-  else {
-    // mirror the image to be more intuitive
-    context.setMirror(true);
-    if(!context.enableDepth()){
-      println("failed to enable depth");
-    }
-    context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
-    background(200,0,0);
-    stroke(0,255,255);
-    strokeWeight(3);
-    smooth();
-  }
+  // same as Kinect dimensions
+  size(640, 480);
 }
 
 void draw() {
@@ -52,7 +53,7 @@ void draw() {
   // display the image
   image(context.sceneImage(), 0, 0);
   if(user > 0){
-    drawHead(user);
+    drawSkeleton(user);
   }
 }
 
