@@ -14,8 +14,7 @@ void setup() {
   size(640, 480);
   // initialize SimpleOpenNI object
   context = new SimpleOpenNI(this);
-  context.addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
-  if (context.openFileRecording("/home/ultravader/GitRepos/acmX_exhibitA/creative_applications_examples/example1_withplayback/hometest_single.oni")) {
+  if (context.openFileRecording("hometest_single.oni")) {
     println("Open File Recording was successful"); 
   } else {
     println("File opening was not successful"); 
