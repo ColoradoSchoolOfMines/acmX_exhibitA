@@ -19,7 +19,7 @@ import SimpleOpenNI.*;
 SimpleOpenNI  context;
 
 //Set this to true to record, false to playback test file
-boolean       recordFlag = false;
+boolean       recordFlag = true;
 
 
 void setup()
@@ -29,7 +29,7 @@ void setup()
   if(recordFlag == false)
   {
     // playing, this works without the camera
-    if ( context.openFileRecording("test.oni") == false)
+    if ( context.openFileRecording("one_guy_waving.oni") == false)
     {
       println("can't find recording !!!!");
       exit();
@@ -65,7 +65,7 @@ void setup()
     }
 
     // setup the recording 
-    context.enableRecorder(SimpleOpenNI.RECORD_MEDIUM_FILE, "test.oni");
+    context.enableRecorder(SimpleOpenNI.RECORD_MEDIUM_FILE, "skeleton.oni");
 
     // select the recording channels
     context.addNodeToRecording(SimpleOpenNI.NODE_DEPTH, 

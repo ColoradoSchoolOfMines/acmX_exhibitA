@@ -12,25 +12,29 @@ int user = 0;
 PVector pos = new PVector();
 PVector pos2D = new PVector();
 
+//PrintWriter to write data to file
+PrintWriter output;
+
 void setup() {
+  output = createWriter("data/1positions.csv");
   // initialize SimpleOpenNI object
   context = new SimpleOpenNI(this);
   //context.addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
-  if (false && context.openFileRecording("hometest_single.oni")) {
-    println("Open File Recording was successful"); 
-  } else {
-    println("File opening was not successful"); 
+  if (false && context.openFileRecording("two_guys_waving.oni")) {
+    println("Open File Recording was successful");
+  } 
+  else {
+    println("File opening was not successful");
   }
   {
     // mirror the image to be more intuitive
     context.setMirror(true);
-    if(!context.enableDepth()){
+    if (!context.enableDepth()) {
       println("failed to enable depth");
-      
     }
     context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
-    background(200,0,0);
-    stroke(0,255,255);
+    background(200, 0, 0);
+    stroke(0, 255, 255);
     strokeWeight(3);
     smooth();
   }
@@ -52,51 +56,55 @@ void draw() {
   //cam = context.sceneImage().get();
   // display the image
   image(context.sceneImage(), 0, 0);
-  if(user > 0){
-    drawSkeleton(user);
+
+  for (int i = 0; i < user; i++) {
+    drawHead(i+1);
   }
 }
 
-void drawHead(int userId){
+void drawHead(int userId) {
   context.getJointPositionSkeleton(user, context.SKEL_HEAD, pos);
   context.convertRealWorldToProjective(pos, pos2D);
   pos = pos2D;
-  println(pos.x + " " + pos.y + " " + pos.z);
+  if (pos.x != 0 && pos.y != 0) {
+    output.println(pos.x + ", " + pos.y + ", " + pos.z);
+  }
   //println(pos2D.x + " " + pos2D.y);
-  ellipse(pos2D.x, pos2D.y, 30-pos.z*0.1, 30-pos.z*0.1);
+  //ellipse(pos2D.x, pos2D.y, 30-pos.z*0.1, 30-pos.z*0.1);
+  ellipse(pos2D.x, pos2D.y, 30-log(pos.z), 30-log(pos.z));
 }
 
 // draw the skeleton with the selected joints
 void drawSkeleton(int userId)
 {  
   context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
- 
+
   context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
   context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
   context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
- 
+
   context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
- 
+
   context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
- 
+
   context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
   context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
   context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
- 
+
   context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
   context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
+  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
 }
 
-void onNewUser(int userId){
-  println("detected" + userId);
+void onNewUser(int userId) {
+  println("detected: " + userId);
   user = userId;
-  context.requestCalibrationSkeleton(userId,true);
+  context.requestCalibrationSkeleton(userId, true);
 }
-void onLostUser(int userId){
+void onLostUser(int userId) {
   println("lost: " + userId);
   user = 0;
 }
@@ -104,46 +112,46 @@ void onExitUser(int userId)
 {
   println("onExitUser - userId: " + userId);
 }
- 
+
 void onReEnterUser(int userId)
 {
   println("onReEnterUser - userId: " + userId);
 }
- 
- 
+
+
 void onStartCalibration(int userId)
 {
   println("onStartCalibration - userId: " + userId);
 }
- 
+
 void onEndCalibration(int userId, boolean successfull)
 {
   println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
- 
+
   if (successfull) 
   { 
     println("  User calibrated !!!");
-    context.startTrackingSkeleton(userId); 
+    context.startTrackingSkeleton(userId);
   } 
   else 
   { 
     println("  Failed to calibrate user !!!");
     println("  Start pose detection");
-    context.requestCalibrationSkeleton(userId,true);
+    context.requestCalibrationSkeleton(userId, true);
   }
 }
- 
-void onStartPose(String pose,int userId)
+
+void onStartPose(String pose, int userId)
 {
   println("onStartdPose - userId: " + userId + ", pose: " + pose);
   println(" stop pose detection");
- 
+
   context.stopPoseDetection(userId); 
   context.requestCalibrationSkeleton(userId, true);
- 
 }
- 
-void onEndPose(String pose,int userId)
+
+void onEndPose(String pose, int userId)
 {
   println("onEndPose - userId: " + userId + ", pose: " + pose);
 }
+
