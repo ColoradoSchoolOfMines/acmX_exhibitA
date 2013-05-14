@@ -19,7 +19,7 @@ import SimpleOpenNI.*;
 SimpleOpenNI  context;
 
 //Set this to true to record, false to playback test file
-boolean       recordFlag = true;
+boolean       recordFlag = false;
 
 
 void setup()

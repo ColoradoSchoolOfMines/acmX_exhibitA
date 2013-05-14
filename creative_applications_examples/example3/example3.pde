@@ -83,7 +83,6 @@ void setup() {
 }
  
 void draw() {
-  println("Drawing");
   background(bgColor);
   // update the SimpleOpenNI object
   context.update();
@@ -111,7 +110,7 @@ void draw() {
  
 void updateAndDrawBox2D() {
   // if frameRate is sufficient, add a polygon and a circle with a random radius
-  if (frameRate > 29) {
+  if (polygons.size() < 128) {
     polygons.add(new CustomShape(kinectWidth/2, -50, -1));
     polygons.add(new CustomShape(kinectWidth/2, -50, random(2.5, 20)));
   }
